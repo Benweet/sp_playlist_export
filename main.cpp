@@ -1,6 +1,7 @@
 #include <cstring>
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 #include <libspotify/api.h>
 #include <sys/time.h>
 #include <stdint.h>
@@ -10,7 +11,7 @@
 #include <sstream>
 #include <fstream>
 #include <faac.h>
-#include <mp4v2/mp4v2.h>
+#include <signal.h>
 
 using namespace std;
 
@@ -102,6 +103,8 @@ map<string, sp_track*>::iterator g_TrackIter;
 string g_OutputDir;
 // Output file path
 string g_OutputFilePath;
+// Delete output file
+bool g_DeleteOutputFile = false;
 
 void ReplaceAll(string& io_String, string i_Search, string i_Replace)
 {
@@ -125,6 +128,7 @@ string GetFilePath(string i_Filename)
     ReplaceAll(i_Filename, "/", ", ");
     ReplaceAll(i_Filename, ":", " - ");
     ReplaceAll(i_Filename, "?", "");
+    ReplaceAll(i_Filename, "\"", "'");
     ReplaceAll(i_Filename, "  ", " ");
     LOG("Formatted name: " << i_Filename);
     // Create file path
@@ -163,10 +167,14 @@ void PlayTrack()
 void TrackEnded()
 {
     LOG_FUNCTION("TrackEnded");
+    sp_session_player_play(g_Session, false);
     sp_session_player_unload(g_Session);
 
     g_AacFileStream.close();
     faacEncClose(g_FaacEncHdl);
+
+    if(g_DeleteOutputFile)
+        remove(g_OutputFilePath.c_str());
 
     g_ExitCode = 1;
     sp_session_logout(g_Session);
@@ -288,6 +296,15 @@ void SpEndOfTrackCb(sp_session *session)
     pthread_mutex_unlock(&g_NotifyMutex);
 }
 
+void Interrupt(int i_Signal)
+{
+    LOG_FUNCTION("Interrupt");
+    pthread_mutex_lock(&g_NotifyMutex);
+    g_PlaybackFinished = true;
+    g_DeleteOutputFile = true;
+    pthread_cond_signal(&g_NotifyCond);
+    pthread_mutex_unlock(&g_NotifyMutex);
+}
 
 void SpLoggedInCb(sp_session *session, sp_error error)
 {
@@ -296,6 +313,7 @@ void SpLoggedInCb(sp_session *session, sp_error error)
         LOG_ERR("Error: login failed: " << sp_error_message(error));
         exit(-1);
     }
+    signal(SIGINT, Interrupt);
     sp_session_set_connection_rules(session, SP_CONNECTION_RULE_NETWORK);
     sp_session_set_connection_type(session, SP_CONNECTION_TYPE_WIFI );
     sp_session_preferred_bitrate(session, SP_BITRATE_320k);
@@ -423,6 +441,7 @@ void MainLoop()
         pthread_mutex_lock(&g_NotifyMutex);
     }
 }
+
 
 int main(int argc, char* argv[])
 {
