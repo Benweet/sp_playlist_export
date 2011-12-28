@@ -6,7 +6,7 @@ l_Args = l_Parser.parse_args()
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-l_PlaylistList = ['Blues', 'Jazz FM']
+l_PlaylistList = ['Funk', 'Rythm & Blues', 'Blues', 'Soul', 'Groove', 'Jazz FM']
 
 for l_Playlist in l_PlaylistList:
     

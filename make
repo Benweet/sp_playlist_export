@@ -1,1 +1,1 @@
-g++ main.cpp -o sp_playlist_export -lspotify -lfaac -lmp4v2
+g++ main.cpp -o sp_playlist_export -lspotify -lfaac -lmp4v2 -lrt

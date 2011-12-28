@@ -12,6 +12,7 @@
 #include <fstream>
 #include <faac.h>
 #include <signal.h>
+#include <dirent.h>
 
 using namespace std;
 
@@ -106,6 +107,26 @@ string g_OutputFilePath;
 // Delete output file
 bool g_DeleteOutputFile = false;
 
+void ListDir(string i_Directory, vector<string>& o_FileList)
+{
+    DIR* l_Dir;
+    struct dirent* l_Dirent;
+    if((l_Dir = opendir(i_Directory.c_str())) == NULL) {
+        LOG_ERR("Error: Unable to open directory " << i_Directory);
+        exit(-1);
+    }
+
+    while((l_Dirent = readdir(l_Dir)) != NULL) {
+        if(l_Dirent->d_name[0] != '.')
+        {
+            stringstream l_FilePath;
+            l_FilePath << i_Directory << l_Dirent->d_name;
+            o_FileList.push_back(l_FilePath.str());
+        }
+    }
+    closedir(l_Dir);
+}
+
 void ReplaceAll(string& io_String, string i_Search, string i_Replace)
 {
     int l_Position = 0;
@@ -180,6 +201,23 @@ void TrackEnded()
     sp_session_logout(g_Session);
 }
 
+void CleanDestDir()
+{
+    vector<string> l_FileList;
+    stringstream l_OutputDirPathStr;
+    l_OutputDirPathStr << g_OutputDir << "/" << g_PlaylistName << "/";
+    ListDir(l_OutputDirPathStr.str(), l_FileList);
+    vector<string>::iterator l_FileListIter = l_FileList.begin();
+    for(;l_FileListIter != l_FileList.end(); ++l_FileListIter)
+    {
+        if(g_TrackList.find(*l_FileListIter) == g_TrackList.end())
+        {
+            LOG_OUT("Removing " << *l_FileListIter);
+            remove(l_FileListIter->c_str());
+        }
+    }
+}
+
 void LoadPlaylist()
 {
     LOG_FUNCTION("LoadPlaylist");
@@ -201,9 +239,15 @@ void LoadPlaylist()
             l_TrackNameStr << sp_artist_name(sp_track_artist(l_Track, l_ArtistIndex));
         }
         l_TrackNameStr << " - " << sp_track_name(l_Track);
+        if(l_TrackNameStr.str() == " - ")
+        {
+            LOG_ERR("Error: Unable to load playlist");
+            exit(-1);
+        }
         string l_FilePath = GetFilePath(l_TrackNameStr.str());
         g_TrackList[l_FilePath] = l_Track;
     }
+    CleanDestDir();
     g_TrackIter = g_TrackList.begin();
     PlayTrack();
 }
