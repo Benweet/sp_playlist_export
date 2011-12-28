@@ -301,7 +301,7 @@ int SpMusicDeliveryCb(sp_session *session, const sp_audioformat *format, const v
         //l_AacEncoderCfg->allowMidside = 0;
         //l_AacEncoderCfg->bitRate = 128000;
         //l_AacEncoderCfg->bandWidth = -1;
-        l_AacEncoderCfg->quantqual = 110;
+        l_AacEncoderCfg->quantqual = 120;
         l_AacEncoderCfg->outputFormat = 1;
         l_AacEncoderCfg->inputFormat = FAAC_INPUT_16BIT;
 
