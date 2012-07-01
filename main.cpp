@@ -378,7 +378,7 @@ void SpLoggedInCb(sp_session *session, sp_error error)
 void SpLoggedOutCb(sp_session *session)
 {
     LOG_FUNCTION("SpLoggedOutCb");
-    sp_session_release(session);
+    //sp_session_release(session);
     g_LogStream.close();
     exit(g_ExitCode);
 }
