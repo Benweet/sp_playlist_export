@@ -20,4 +20,5 @@ for l_Playlist in l_PlaylistList:
             break
     
     if l_Result:
+        print("ERROR:", l_Result)
         sys.exit(l_Result)
