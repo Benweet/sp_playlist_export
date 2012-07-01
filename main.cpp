@@ -149,6 +149,7 @@ string GetFilePath(string i_Filename)
     ReplaceAll(i_Filename, "/", ", ");
     ReplaceAll(i_Filename, ":", " - ");
     ReplaceAll(i_Filename, "?", "");
+    ReplaceAll(i_Filename, "*", ".");
     ReplaceAll(i_Filename, "\"", "'");
     ReplaceAll(i_Filename, "  ", " ");
     LOG("Formatted name: " << i_Filename);
@@ -310,7 +311,7 @@ int SpMusicDeliveryCb(sp_session *session, const sp_audioformat *format, const v
             exit(-1);
         }
 
-        g_AacFileStream.open(g_OutputFilePath.c_str(), ios::out | ios::binary);
+        g_AacFileStream.open(g_OutputFilePath.c_str(), ios_base::out | ios_base::binary);
         if(!g_AacFileStream)
         {
             LOG_ERR("Error: Unable to write file " << g_OutputFilePath.c_str());
@@ -509,7 +510,7 @@ int main(int argc, char* argv[])
     pthread_cond_init(&g_NotifyCond, NULL);
 
     LOG("Calling sp_session_login");
-    sp_session_login(g_Session, argv[1], argv[2], 0);
+    sp_session_login(g_Session, argv[1], argv[2], false, NULL);
 
     MainLoop();
     return 0;

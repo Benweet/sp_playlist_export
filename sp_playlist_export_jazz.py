@@ -10,12 +10,12 @@ l_PlaylistList = ['Funk', 'Rythm & Blues', 'Blues', 'Soul', 'Groove', 'Jazz FM']
 
 for l_Playlist in l_PlaylistList:
     
-    l_DirPath = os.path.join('/media/F84E-1690', l_Playlist)
+    l_DirPath = os.path.join('/run/media/benweet/F84E-1690', l_Playlist)
     if not os.path.isdir(l_DirPath):
         os.mkdir(l_DirPath)
         
     while(True):
-        l_Result = subprocess.call(['./sp_playlist_export', 'Benweet', l_Args.passwd, '/media/F84E-1690', l_Playlist])
+        l_Result = subprocess.call(['./sp_playlist_export', 'Benweet', l_Args.passwd, '/run/media/benweet/F84E-1690', l_Playlist])
         if l_Result != 1:
             break
     

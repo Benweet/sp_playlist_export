@@ -3,7 +3,6 @@
 	<name>spotify-playlist-export</name>
 	<comment></comment>
 	<projects>
-		<project>faac-1.28</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
