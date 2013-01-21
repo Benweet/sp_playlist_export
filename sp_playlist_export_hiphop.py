@@ -1,7 +1,7 @@
 import subprocess, os, sys, argparse, glob, shutil
 
-OUTPUT_FOLDER = "E:\\"
-LOCAL_LIBRARY_FOLDER = "Y:\\Music"
+OUTPUT_FOLDER = "F:\\"
+LOCAL_LIBRARY_FOLDER = "Z:\\Documents\\Music"
 
 l_Parser = argparse.ArgumentParser()
 l_Parser.add_argument('passwd')
@@ -46,9 +46,9 @@ def findInLibrary(fileName):
     return None
 
 importLocalDirectory(LOCAL_LIBRARY_FOLDER)
-print "Local library:", len(localLibrary), "files"
+print("Local library:", len(localLibrary), "files")
 
-l_PlaylistList = ['Exotic', 'Funky', 'Jazz Hip-Hop', 'Jazzy', 'New School', 'Old School', 'Trip Hop', 'Underground']
+l_PlaylistList = ['Acid', 'Extc', 'Fky', 'JzzH', 'JzzY', 'NewS', 'OldS', 'TrpH', 'UndrG']
 
 for l_Playlist in l_PlaylistList:
     
@@ -68,9 +68,9 @@ for l_Playlist in l_PlaylistList:
 
             l_Line = l_Process.stdout.readline()
             if l_Line.startswith('_ENCODE_'):
-                print "__________________________________________"
+                print("__________________________________________")
                 l_OutputFilename = "%s.m4a"%l_Line[9:].rstrip()
-                print "ENCODE:", l_OutputFilename
+                print("ENCODE:", l_OutputFilename)
                 l_OutputFilePath = os.path.join(l_DirPath, l_OutputFilename)
                 
                 l_QaacProcess = subprocess.Popen(['qaac', '-i', '-o', l_OutputFilePath, '-'], stdin=l_Process.stdout)
@@ -102,16 +102,16 @@ for l_Playlist in l_PlaylistList:
             break
     
     for dest, src in l_FileToCopy.items():
-        print "__________________________________________"
+        print("__________________________________________")
         if src != None:
-            print "COPY:", dest
+            print("COPY:", dest)
             shutil.copy(src, dest)
         else:
-            print "Not found in local library:", dest
+            print("Not found in local library:", dest)
 
     for filePath in l_FileToRemove.keys():
-        print "__________________________________________"
-        print "REMOVE:", filePath
+        print("__________________________________________")
+        print("REMOVE:", filePath)
         os.unlink(filePath)
 
     if l_Result:

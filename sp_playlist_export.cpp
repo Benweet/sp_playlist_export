@@ -92,7 +92,7 @@ private:
 #define USER_AGENT "benweet"
 
 // For libspotify usage
-sp_session *gSession;
+sp_session *gSession = (sp_session *)1;
 const uint8_t gAppKey[] = {
 	0x01, 0x72, 0x1C, 0xE3, 0x79, 0xB5, 0xF8, 0xA8, 0x8D, 0x17, 0x1D, 0x2F, 0x54, 0x7B, 0xFF, 0x25,
 	0xE4, 0x56, 0x1E, 0xCD, 0x1E, 0x5A, 0xA0, 0x70, 0xE8, 0x54, 0xCC, 0xC0, 0x76, 0xF9, 0x82, 0x70,
@@ -117,6 +117,7 @@ const uint8_t gAppKey[] = {
 	0x44,
 };
 const size_t gAppKeySize = sizeof(gAppKey);
+const char* gDeviceId = "1234";
 
 // For spotify client
 pthread_mutex_t gNotifyMutex;
@@ -547,6 +548,78 @@ void CALLBACK SpNotifyMainThreadCb(sp_session *session)
 	pthread_mutex_unlock(&gNotifyMutex);
 }
 
+void CALLBACK SpMetadataUpdatedCb(sp_session *session)
+{
+	LOG_FUNCTION("SpMetadataUpdatedCb");
+}
+
+void CALLBACK SpMessageToUserCb(sp_session *session, const char *message)
+{
+	LOG_FUNCTION("SpMessageToUserCb");
+	LOG(message);
+}
+
+void CALLBACK SpPlayTokenLostCb(sp_session *session)
+{
+	LOG_FUNCTION("SpPlayTokenLostCb");
+}
+
+void CALLBACK SpStreamingErrorCb(sp_session *session, sp_error error)
+{
+	LOG_FUNCTION("SpStreamingErrorCb");
+	LOG_ERR("Error: " << sp_error_message(error));
+	exit(-1);
+}
+
+void CALLBACK SpUserinfoUpdatedCb(sp_session *session)
+{
+	LOG_FUNCTION("SpUserinfoUpdatedCb");
+}
+
+void CALLBACK SpStartPlaybackCb(sp_session *session)
+{
+	LOG_FUNCTION("SpStartPlaybackCb");
+}
+
+void CALLBACK SpGetAudioBufferStatsCb(sp_session *session, sp_audio_buffer_stats *stats)
+{
+	LOG_FUNCTION("SpGetAudioBufferStatsCb");
+}
+
+void CALLBACK SpOfflineStatusUpdatedCb(sp_session *session)
+{
+	LOG_FUNCTION("SpOfflineStatusUpdatedCb");
+}
+
+void CALLBACK SpOfflineErrorCb(sp_session *session, sp_error error)
+{
+	LOG_FUNCTION("SpOfflineErrorCb");
+	LOG_ERR("Error: " << sp_error_message(error));
+	exit(-1);
+}
+
+void CALLBACK SpCredentialsBlobUpdatedCb(sp_session *session, const char *blob)
+{
+	LOG_FUNCTION("SpCredentialsBlobUpdatedCb");
+}
+
+void CALLBACK SpConnectionstateUpdatedCb(sp_session *session)
+{
+	LOG_FUNCTION("SpConnectionstateUpdatedCb");
+}
+
+void CALLBACK SpScrollableErrorCb(sp_session *session, sp_error error)
+{
+	LOG_FUNCTION("SpScrollableErrorCb");
+	LOG_ERR("Error: " << sp_error_message(error));
+	exit(-1);
+}
+
+void CALLBACK SpPrivateSessionModeChangedCb(sp_session *session, bool is_private)
+{
+	LOG_FUNCTION("SpPrivateSessionModeChangedCb");
+}
+
 
 void InitStructures()
 {
@@ -555,8 +628,8 @@ void InitStructures()
 	memset(&gSpConfig, 0, sizeof(sp_session_config));
 	gSpConfig.api_version = SPOTIFY_API_VERSION;
 #ifdef _WIN32
-	gSpConfig.cache_location = "C:\\Users\\Benweet\\AppData\\Local\\Spotify";
-	gSpConfig.settings_location = "C:\\Users\\Benweet\\AppData\\Local\\Spotify";
+	gSpConfig.cache_location = "Z:\\Temp\\LibSpotify";
+	gSpConfig.settings_location = "Z:\\Temp\\LibSpotify";
 #else
 	gSpConfig.cache_location = "/home/benweet/.config/spotify";
 	gSpConfig.settings_location = "/home/benweet/.config/spotify";
@@ -566,8 +639,9 @@ void InitStructures()
 	gSpConfig.user_agent = USER_AGENT;
 	gSpConfig.callbacks = &gSpSessionCallbacks;
 	//gSpConfig.dont_save_metadata_for_playlists = true;
-	//gSpConfig.initially_unload_playlists = true;
-	//gSpConfig.tracefile = "libspotify.log";
+	gSpConfig.initially_unload_playlists = true;
+	gSpConfig.tracefile = "libspotify.log";
+	gSpConfig.device_id = gDeviceId;
 
 	memset(&gSpSessionCallbacks, 0, sizeof(sp_session_callbacks));
 	gSpSessionCallbacks.logged_in = &SpLoggedInCb;
@@ -578,6 +652,19 @@ void InitStructures()
 	gSpSessionCallbacks.log_message = &SpLogMessageCb;
 	gSpSessionCallbacks.end_of_track = &SpEndOfTrackCb;
 	gSpSessionCallbacks.stop_playback = &SpEndOfTrackCb;
+	gSpSessionCallbacks.metadata_updated = &SpMetadataUpdatedCb;
+	gSpSessionCallbacks.message_to_user = &SpMessageToUserCb;
+	gSpSessionCallbacks.play_token_lost = &SpPlayTokenLostCb;
+	gSpSessionCallbacks.streaming_error = &SpStreamingErrorCb;
+	gSpSessionCallbacks.userinfo_updated = &SpUserinfoUpdatedCb;
+	gSpSessionCallbacks.start_playback = &SpStartPlaybackCb;
+	gSpSessionCallbacks.get_audio_buffer_stats = &SpGetAudioBufferStatsCb;
+	gSpSessionCallbacks.offline_status_updated = &SpOfflineStatusUpdatedCb;
+	gSpSessionCallbacks.offline_error = &SpOfflineErrorCb;
+	gSpSessionCallbacks.credentials_blob_updated = &SpCredentialsBlobUpdatedCb;
+	gSpSessionCallbacks.connectionstate_updated = &SpConnectionstateUpdatedCb;
+	gSpSessionCallbacks.scrobble_error = &SpScrollableErrorCb;
+	gSpSessionCallbacks.private_session_mode_changed = &SpPrivateSessionModeChangedCb;
 
 	memset(&gSpPlaylistContainerCallbacks, 0, sizeof(sp_playlistcontainer_callbacks));
 	gSpPlaylistContainerCallbacks.container_loaded = &SpPlaylistContainerLoadedCb;
